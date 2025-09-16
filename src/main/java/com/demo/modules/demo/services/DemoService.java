@@ -44,20 +44,13 @@ public class DemoService {
         }
     }
 
-    public PaginatedResponse<DemoEntity> findAllWithPagination(QueryDto query) {
+    public Page<DemoEntity> findAllWithPagination(QueryDto query) {
         Pageable pageable = PageRequest.of(
                 query.getPage(),
                 query.getPageSize(),
                 Sort.by(query.getSortDirection(), query.getSortBy()));
         Page<DemoEntity> pageResult = demoRepository.findAll(pageable);
-        return new PaginatedResponse<>(
-                pageResult.getContent(),
-                new PaginatedResponse.Pagination(
-                        pageResult.getNumber(),
-                        pageResult.getSize(),
-                        pageResult.getTotalElements(),
-                        pageResult.getTotalPages(),
-                        pageResult.isLast()));
+        return pageResult;
     }
 
     public Optional<DemoEntity> findById(Long id) {

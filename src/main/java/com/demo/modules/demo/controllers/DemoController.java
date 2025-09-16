@@ -18,6 +18,7 @@ import com.demo.modules.demo.entities.DemoEntity;
 import com.demo.modules.demo.services.DemoService;
 import com.demo.shared.dto.PaginatedResponse;
 import com.demo.shared.dto.QueryDto;
+import org.springframework.data.domain.Page;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,7 +54,18 @@ public class DemoController {
         @ModelAttribute QueryDto query
     ) {
         try {
-            return demoService.findAllWithPagination(query);
+             Page<DemoEntity> pageResult = demoService.findAllWithPagination(query);
+
+            PaginatedResponse<DemoEntity> response = new PaginatedResponse<>();
+            response.setData(pageResult.getContent());
+            response.setPagination(new PaginatedResponse.Pagination(
+                    pageResult.getNumber(),
+                    pageResult.getSize(),
+                    pageResult.getTotalElements(),
+                    pageResult.getTotalPages(),
+                    pageResult.isLast()));
+
+            return response;
         } catch (Exception e) {
             // TODO Auto-generated catch block
             logger.error(e);

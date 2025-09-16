@@ -2,26 +2,19 @@ package com.demo.shared.exception;
 
 import java.time.LocalDateTime;
 
-public class ErrorResponse {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ErrorResponse<T> {
     private String message;
-    private int status;
-    private LocalDateTime timestamp;
+    private String status;
+    private String path;
+    private T details;
+    private LocalDateTime timestamp = LocalDateTime.now();
 
-    public ErrorResponse(String message, int status) {
-        this.message = message;
-        this.status = status;
-        this.timestamp = LocalDateTime.now();
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
 }
