@@ -2,7 +2,6 @@ package com.demo.modules.demo.services;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,68 +11,62 @@ import org.springframework.stereotype.Service;
 import com.demo.modules.demo.dtos.CreateDemoDto;
 import com.demo.modules.demo.dtos.UpdateDemoDto;
 import com.demo.modules.demo.entities.DemoEntity;
+import com.demo.modules.demo.mapper.DemoMapper;
 import com.demo.modules.demo.repository.DemoRepository;
-import com.demo.shared.dto.PaginatedResponse;
 import com.demo.shared.dto.QueryDto;
 import com.demo.shared.exception.ResourceNotFoundException;
 
-import java.util.Optional;
-import org.modelmapper.ModelMapper;
+import lombok.RequiredArgsConstructor;
+
 
 @Service
+@RequiredArgsConstructor
 public class DemoService {
     private static final Logger logger = LogManager.getLogger(DemoService.class);
 
-    @Autowired
     private final DemoRepository demoRepository;
+    private final DemoMapper demoMapper;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
-    public DemoService(DemoRepository demoRepository) {
-        this.demoRepository = demoRepository;
-    }
-
+    /** Create new demo entity */
     public DemoEntity save(CreateDemoDto dto) {
-        try {
-            logger.info("Creating demo!!!");
-            DemoEntity demo = modelMapper.map(dto, DemoEntity.class);
-            return demoRepository.save(demo);
-        } catch (Exception e) {
-            throw e;
-        }
+        DemoEntity entity = demoMapper.toEntity(dto);
+        return demoRepository.save(entity);
     }
 
+    /** Paginated fetch */
     public Page<DemoEntity> findAllWithPagination(QueryDto query) {
         Pageable pageable = PageRequest.of(
                 query.getPage(),
                 query.getPageSize(),
-                Sort.by(query.getSortDirection(), query.getSortBy()));
-        Page<DemoEntity> pageResult = demoRepository.findAll(pageable);
-        return pageResult;
+                Sort.by(query.getSortDirection(), query.getSortBy())
+        );
+        return demoRepository.findAll(pageable);
     }
 
-    public Optional<DemoEntity> findById(Long id) {
-        return demoRepository.findById(id);
-    }
-
-    public void delete(Long id) {
-        final Optional<DemoEntity> existingDemo = demoRepository.findById(id);
-        if (existingDemo.isEmpty()) {
-            throw new ResourceNotFoundException("Demo entity with id: " + id + " not found!!");
-        }
-        this.demoRepository.deleteById(id);
-    }
-
-    public DemoEntity update(Long id, UpdateDemoDto dto) {
-        DemoEntity demo = demoRepository.findById(id)
+    /** Fetch by ID */
+    public DemoEntity findById(Long id) {
+        return demoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Demo with record %d not found!!", id)));
+                        "Demo entity with id: " + id + " not found!"));
+    }
 
-        // Map non-null fields from dto to entity
-        modelMapper.map(dto, demo);
+    /** Update existing entity */
+    public DemoEntity update(Long id, UpdateDemoDto dto) {
+        DemoEntity entity = demoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Demo entity with id: " + id + " not found!"));
 
-        return demoRepository.save(demo);
+        demoMapper.updateFromDto(dto, entity);
+        return demoRepository.save(entity);
+    }
+
+    /** Delete entity */
+    public void delete(Long id) {
+        if (!demoRepository.existsById(id)) {
+            throw new ResourceNotFoundException(
+                    "Demo entity with id: " + id + " not found!");
+        }
+        demoRepository.deleteById(id);
     }
 
 }

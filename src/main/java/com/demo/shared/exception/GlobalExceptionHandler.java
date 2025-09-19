@@ -1,6 +1,5 @@
 package com.demo.shared.exception;
 
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
@@ -65,6 +64,26 @@ public class GlobalExceptionHandler {
         response.setPath(request.getRequestURI());
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse<String>> handleResourceExists(
+            ResourceAlreadyExistsException ex, HttpServletRequest request) {
+
+        logger.warn("ResourceAlreadyExistsException: {}", ex.getMessage());
+
+        ErrorResponse<String> response = new ErrorResponse<>();
+        response.setStatus("error");
+        response.setMessage(ex.getMessage());
+        response.setTimestamp(LocalDateTime.now());
+        response.setPath(request.getRequestURI());
+
+        // Optionally include details or stack trace in development
+        if ("development".equalsIgnoreCase(environment)) {
+            response.setDetails(getStackTraceAsString(ex));
+        }
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     // Utility method to convert stack trace to string

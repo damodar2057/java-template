@@ -1,0 +1,36 @@
+services:
+  broker-service-java:
+    container_name: broker-service-java
+    image: broker-service:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    # Pass environment variables to the container
+    env_file:
+      - .env
+
+    # Define the port mapping from the host to the container
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    network_mode: host
+    volumes:
+      - ./target:/app/target    # mount compiled JARs
+    
+    # Add the service to the custom network
+    # networks:
+    #   - app-network
+
+    # Best practice: use a health check to ensure dependencies are ready
+    # This is especially useful in multi-container setups.
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:${SERVER_PORT}/actuator/health"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+
+    restart: unless-stopped
+
+# networks:
+#   app-network:
+#     driver: bridge

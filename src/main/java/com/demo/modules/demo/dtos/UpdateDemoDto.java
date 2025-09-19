@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateDemoDto {
     private String name;
+    private int age;
 }

@@ -1,0 +1,13 @@
+services:
+  broker-service-java-dev:
+    container_name: broker-service-java-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    volumes:
+      - ./src:/app/src          # hot reload source
+      - ./pom.xml:/app/pom.xml  # hot reload dependencies
+    restart: unless-stopped
+    network_mode: host
